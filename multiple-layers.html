@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-tw">
+  <head>
+    <title>Multiple Layers</title>
+    <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css" type="text/css">
+    <style>
+      .map {
+        height: 600px;
+        width: 100%;
+      }
+    </style>
+    <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <script type="text/javascript">
+	  var university = ol.proj.fromLonLat([120.994723,24.795500]);
+	  var seniorHigh = ol.proj.fromLonLat([120.994056,24.798387]);
+	  var juniorHigh = ol.proj.fromLonLat([121.002308,24.798110]);
+	  var elementary = ol.proj.fromLonLat([120.999154,24.800847]);
+	  
+	  var pointLayer = new ol.layer.Vector({
+	    source: new ol.source.Vector({
+		  features: [new ol.Feature({
+		    geometry: new ol.geom.Point(university)
+		  })]
+		})
+	  });
+	  
+	  var lineLayer = new ol.layer.Vector({
+	    source: new ol.source.Vector({
+		  features: [new ol.Feature({
+		    geometry: new ol.geom.LineString([university, seniorHigh])
+		  })]
+		})
+	  });
+	  
+	  var circleLayer = new ol.layer.Vector({
+	    source: new ol.source.Vector({
+		  features: [new ol.Feature({
+		    geometry: new ol.geom.Circle(elementary, 100)
+		  })]
+		})
+	  });
+	  
+	  var polygonLayer = new ol.layer.Vector({
+	    source: new ol.source.Vector({
+		  features: [new ol.Feature({
+		    geometry: new ol.geom.Polygon([
+			  [seniorHigh, juniorHigh, elementary, seniorHigh]
+			]),
+		  })]
+		})
+	  });
+	  
+      var map = new ol.Map({
+        target: 'map',
+        layers: [
+          new ol.layer.Tile({
+            source: new ol.source.OSM()
+          }),
+		  pointLayer, lineLayer, circleLayer, polygonLayer
+        ],
+        view: new ol.View({
+          center: ol.proj.fromLonLat([120.996665,24.796442]),
+          zoom: 16
+        })
+      });
+    </script>
+  </body>
+</html>
