@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-tw">
+  <head>
+    <title>Draw On Map</title>
+    <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css" type="text/css">
+    <style>
+      .map {
+        height: 600px;
+        width: 100%;
+      }
+    </style>
+    <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <div>
+      <label>Draw a </label>
+      <select id="type">
+        <option value="Polygon">Polygon</option>
+        <option value="Circle">Circle</option>
+        <option value="LineString">Line</option>
+      </select>  
+    </div>
+    <script type="text/javascript">
+      var source = new ol.source.Vector({});
+      var drawLayer = new ol.layer.Vector({
+        source: source,
+        style: new ol.style.Style({
+          fill: new ol.style.Fill({ color: 'rgba(255, 255, 255, 0.5)' }),
+          stroke: new ol.style.Stroke({ color: '#ffcc33', width: 3 })
+        })
+      });
+
+      var map = new ol.Map({
+        target: 'map',
+        layers: [
+          new ol.layer.Tile({
+            source: new ol.source.OSM()
+          }),
+          drawLayer
+        ],
+        view: new ol.View({
+          center: ol.proj.fromLonLat([120.996665,24.796442]),
+          zoom: 16
+        })
+      });
+
+      var createDraw = function(type) {
+        return new ol.interaction.Draw({
+          source: source, type: type
+        });
+      };
+
+      var draw = createDraw('Polygon');
+      map.addInteraction(draw);
+
+      document.getElementById('type').onchange = function() {
+        map.removeInteraction(draw);
+        draw = createDraw(document.getElementById('type').value);
+        map.addInteraction(draw);
+      }
+    </script>
+  </body>
+</html>

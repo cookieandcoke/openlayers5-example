@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-tw">
+  <head>
+    <title>Draw On Map</title>
+    <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css" type="text/css">
+    <style>
+      .map {
+        height: 600px;
+        width: 100%;
+      }
+    </style>
+    <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <div>
+      <label>Draw a </label>
+      <select id="type">
+        <option value="Square">Square</option>
+        <option value="Rectangle">Rectangle</option>
+        <option value="Custom">Hourglass</option>
+      </select>  
+    </div>
+    <script type="text/javascript">
+      var source = new ol.source.Vector({});
+      var drawLayer = new ol.layer.Vector({
+        source: source,
+        style: new ol.style.Style({
+          fill: new ol.style.Fill({ color: 'rgba(255, 255, 255, 0.5)' }),
+          stroke: new ol.style.Stroke({ color: '#ffcc33', width: 3 })
+        })
+      });
+
+      var map = new ol.Map({
+        target: 'map',
+        layers: [
+          new ol.layer.Tile({
+            source: new ol.source.OSM()
+          }),
+          drawLayer
+        ],
+        view: new ol.View({
+          center: ol.proj.fromLonLat([120.996665,24.796442]),
+          zoom: 16
+        })
+      });
+
+      var createDraw = function(value) {
+        var geometryFunction;
+        if(value === 'Square') {
+          geometryFunction = new ol.interaction.Draw.createRegularPolygon(4);
+        } else if(value === 'Rectangle') {
+          geometryFunction = new ol.interaction.Draw.createBox();
+        } else if(value === 'Custom') {
+          geometryFunction = function(coordinates, geometry) {
+            var p1 = coordinates[0];
+            var p2 = coordinates[1];
+            var newCoordinates = [p1, p2, [p1[0], p2[1]], [p2[0], p1[1]], p1];
+            if (!geometry) {
+              geometry = new ol.geom.Polygon([newCoordinates]);
+            } else {
+              geometry.setCoordinates([newCoordinates]);
+            }
+            return geometry;
+          }
+        }
+        return new ol.interaction.Draw({
+          source: source, type: 'Circle', geometryFunction: geometryFunction
+        });
+      };
+
+      var draw = createDraw('Square');
+      map.addInteraction(draw);
+
+      document.getElementById('type').onchange = function() {
+        map.removeInteraction(draw);
+        draw = createDraw(document.getElementById('type').value);
+        map.addInteraction(draw);
+      }
+    </script>
+  </body>
+</html>
